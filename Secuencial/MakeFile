@@ -1,0 +1,9 @@
+all: compile link
+
+compile:
+	g++ -c test.cpp -I"D:\Desarrollo\C++\SFML-2.5.1\include" -DSFML_STATIC
+
+link:
+	g++ test.o -o test -L"D:\Desarrollo\C++\SFML-2.5.1\lib" -lsfml-graphics -lsfml-window -lsfml-system
+
+clean: rm -f main *.o
