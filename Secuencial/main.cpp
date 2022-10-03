@@ -6,6 +6,7 @@
 #include <cmath>
 #include <ctime>
 #include <cstdlib>
+#include <iostream>
 
 #include "Headers/ship.h"
 #include "Headers/bulllet.h"
@@ -21,15 +22,13 @@ int main()
 {
     std::srand(static_cast<unsigned int>(std::time(NULL)));
 
-    // Define some constants
+    // Define game constants
     const float pi = 3.14159f;
-    const int gameWidth = 800;
-    const int gameHeight = 600;
-    sf::Vector2f paddleSize(25, 100);
-    float ballRadius = 10.f;
+    const int gameWidth = 1200;
+    const int gameHeight = 900;
 
     // Create the window of the application
-    sf::RenderWindow window(sf::VideoMode(gameWidth, gameHeight, 32), "SFML Pong",
+    sf::RenderWindow window(sf::VideoMode(gameWidth, gameHeight, 32), "Asteroids!",
                             sf::Style::Titlebar | sf::Style::Close);
     window.setVerticalSyncEnabled(true);
 
@@ -39,64 +38,59 @@ int main()
     //     return EXIT_FAILURE;
     // sf::Sound ballSound(ballSoundBuffer);
 
-    // Define objects
-    Ship ship(sf::Vector2f(gameWidth / 2, gameHeight / 2));
-    Asteriod asteroid(6, 4);
-
-    std::vector<Bullet> bulletArr;
-
-    float asteroidAngle = pi - asteroidAngle + (std::rand() % 20) * pi / 180;
-
-    // Create the left paddle
-    sf::RectangleShape leftPaddle;
-    leftPaddle.setSize(paddleSize - sf::Vector2f(3, 3));
-    leftPaddle.setOutlineThickness(3);
-    leftPaddle.setOutlineColor(sf::Color::Black);
-    leftPaddle.setFillColor(sf::Color(100, 100, 200));
-    leftPaddle.setOrigin(paddleSize / 2.f);
-
-    // Create the right paddle
-    sf::RectangleShape rightPaddle;
-    rightPaddle.setSize(paddleSize - sf::Vector2f(3, 3));
-    rightPaddle.setOutlineThickness(3);
-    rightPaddle.setOutlineColor(sf::Color::Black);
-    rightPaddle.setFillColor(sf::Color(200, 100, 100));
-    rightPaddle.setOrigin(paddleSize / 2.f);
-
-    // Create the ball
-    sf::CircleShape ball;
-    ball.setRadius(ballRadius - 3);
-    ball.setOutlineThickness(3);
-    ball.setOutlineColor(sf::Color::Black);
-    ball.setFillColor(sf::Color::White);
-    ball.setOrigin(ballRadius / 2, ballRadius / 2);
-
     // Load text font
     sf::Font font;
     if (!font.loadFromFile("resources/PressStart2P.ttf"))
         return EXIT_FAILURE;
 
-    // Initialize the pause message
-    sf::Text pauseMessage;
-    pauseMessage.setFont(font);
-    pauseMessage.setCharacterSize(40);
-    pauseMessage.setOrigin(0.5f, 0.5f);
-    pauseMessage.setPosition(gameWidth / 2, gameHeight / 2);
-    pauseMessage.setFillColor(sf::Color::White);
+    // Define game objects
+    Ship ship(sf::Vector2f(gameWidth / 2, gameHeight / 2), gameWidth, gameHeight); // Player (ship)
 
-    pauseMessage.setString("Press 'space' to\nstart the game");
+    std::vector<Bullet> bulletArr;     // Bullet Array
+    std::vector<Asteriod> asteroidArr; // Asterois Array
 
-    // Define the paddles properties
-    sf::Clock AITimer;
-    const sf::Time AITime = sf::seconds(0.1f);
-    const float paddleSpeed = 400.f;
-    float rightPaddleSpeed = 0.f;
-    const float ballSpeed = 400.f;
-    float ballAngle = 0.f; // to be changed later
-    const float asteroidSpeed = 300.f;
+    Asteriod asteroid(8, 4, sf::Vector2f(0, 0), gameWidth, gameHeight);
+    asteroidArr.push_back(asteroid);
 
-    sf::Clock clock;
+    float asteroidAngle = pi - asteroidAngle + (std::rand() % 20) * pi / 180;
+
+    // Control message
+    sf::Text controlMessage;
+    controlMessage.setFont(font);
+    controlMessage.setCharacterSize(40);
+    controlMessage.setOrigin(300, 35);
+    controlMessage.setPosition(gameWidth / 2, gameHeight / 2);
+    controlMessage.setFillColor(sf::Color::White);
+    controlMessage.setString("Press 'Enter' to\n start the game");
+
+    // Score
+    sf::Text scoreMessage;
+    scoreMessage.setFont(font);
+    scoreMessage.setCharacterSize(40);
+    scoreMessage.setPosition(10, 10);
+    scoreMessage.setFillColor(sf::Color::White);
+    scoreMessage.setString("SCORE: 0");
+
+    int score = 0;
+
+    // Define game properties
+    sf::Clock gameClock; // Time of game
+    sf::Clock clock;     // Time to control smooth movements
     bool isPlaying = false;
+    bool hitPause = false;
+
+    const float idleSpeed = 90.f;
+    const float bulletSpeed = 25.f;
+    float shipDir = 1.f;
+    float shipSpeed = 200.f;
+    float shipRotation = 3.f;
+    bool canFire = true;
+    float lastFire = 0.f;
+
+    float asteroidSpeed = 300.f;
+    const float asteroidRotation = 1.5f;
+    float lastCreation = 0.f;
+
     while (window.isOpen())
     {
         // Handle events
@@ -111,106 +105,192 @@ int main()
                 break;
             }
 
-            // Space key pressed: play
-            if ((event.type == sf::Event::KeyPressed) && (event.key.code == sf::Keyboard::Space))
+            // Enter key pressed: play
+            if ((event.type == sf::Event::KeyPressed) && (event.key.code == sf::Keyboard::Enter))
             {
                 if (!isPlaying)
                 {
                     // (re)start the game
                     isPlaying = true;
                     clock.restart();
+                    gameClock.restart();
 
-                    // Reset the position of the paddles and ball
-                    leftPaddle.setPosition(10 + paddleSize.x / 2, gameHeight / 2);
-                    rightPaddle.setPosition(gameWidth - 10 - paddleSize.x / 2, gameHeight / 2);
-                    ball.setPosition(gameWidth / 2, gameHeight / 2);
+                    // Reset position of ship
+                    ship.reset();
+                }
 
-                    // Reset the ball angle
-                    do
-                    {
-                        // Make sure the ball initial angle is not too much vertical
-                        ballAngle = (std::rand() % 360) * 2 * pi / 360;
-                    } while (std::abs(std::cos(ballAngle)) < 0.7f);
+                if (hitPause)
+                {
+                    hitPause = false;
+                    ship.reset();
                 }
             }
         }
 
-        if (isPlaying)
+        float deltaTime = clock.restart().asSeconds();
+        if (isPlaying && !hitPause)
         {
-            float deltaTime = clock.restart().asSeconds();
+            //================================================================
+            //  PLAYER (SHIP)
+            //================================================================
 
-            // Move the player's paddle
-            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up) &&
-                (leftPaddle.getPosition().y - paddleSize.y / 2 > 5.f))
+            //=>Ship's movement
+            float shipAngle = (pi / 180) * (ship.getRotation()); // Convert ship's angle to radians
+
+            // Idle movement, since it's space ship will always be moving
+            float angleX = (idleSpeed * deltaTime * shipDir) * cos(shipAngle);
+            float angleY = (idleSpeed * deltaTime * shipDir) * sin(shipAngle);
+            ship.move(sf::Vector2f(angleX, angleY));
+
+            // Movement with input keys
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
             {
-                leftPaddle.move(0.f, -paddleSpeed * deltaTime);
+                float angleX = (shipSpeed * deltaTime) * cos(shipAngle);
+                float angleY = (shipSpeed * deltaTime) * sin(shipAngle);
+                shipDir = 1; // Set direction of idle movement
+                ship.move(sf::Vector2f(angleX, angleY));
             }
-            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down) &&
-                (leftPaddle.getPosition().y + paddleSize.y / 2 < gameHeight - 5.f))
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
             {
-                leftPaddle.move(0.f, paddleSpeed * deltaTime);
+                float angleX = (-shipSpeed * deltaTime) * cos(shipAngle);
+                float angleY = (-shipSpeed * deltaTime) * sin(shipAngle);
+                shipDir = -1; // Set direction of idle movement
+                ship.move(sf::Vector2f(angleX, angleY));
+            }
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
+            {
+                ship.rotate(-shipRotation);
+            }
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
+            {
+                ship.rotate(shipRotation);
             }
 
-            // Move the computer's paddle
-            if (((rightPaddleSpeed < 0.f) && (rightPaddle.getPosition().y - paddleSize.y / 2 > 5.f)) ||
-                ((rightPaddleSpeed > 0.f) && (rightPaddle.getPosition().y + paddleSize.y / 2 < gameHeight - 5.f)))
+            //=>Ship's bullets
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space) && gameClock.getElapsedTime().asSeconds() > lastFire + .25f)
             {
-                rightPaddle.move(0.f, rightPaddleSpeed * deltaTime);
+                Bullet newBullet(2, ship.getPosition(), pi, ship.getRotation());
+                bulletArr.push_back(newBullet);
+                lastFire = gameClock.getElapsedTime().asSeconds(); // Control elapsed time between shots so prevent infinite bullets
             }
 
-            // Update the computer's paddle direction according to the ball position
-            if (AITimer.getElapsedTime() > AITime)
+            //=>Ship's collisions against asteroids
+            for (int i = 0; i < asteroidArr.size(); i++)
             {
-                AITimer.restart();
-                if (ball.getPosition().y + ballRadius > rightPaddle.getPosition().y + paddleSize.y / 2)
-                    rightPaddleSpeed = paddleSpeed;
-                else if (ball.getPosition().y - ballRadius < rightPaddle.getPosition().y - paddleSize.y / 2)
-                    rightPaddleSpeed = -paddleSpeed;
-                else
-                    rightPaddleSpeed = 0.f;
+                if (asteroidArr[i].shipCollision(ship) == true)
+                {
+                    asteroidArr.clear(); // Delete all current asteroids
+                    controlMessage.setString("Press 'Enter' to\n     revive");
+                    hitPause = true;
+                }
             }
 
-            // Move the ball
+            //================================================================
+            //  ASTEROIDS
+            //================================================================
             float factor = asteroidSpeed * deltaTime;
-            // ball.move(std::cos(ballAngle) * factor, std::sin(ballAngle) * factor);
 
-            //================================================================
-            //  ASTEROID
-
-            // Movement
-            asteroid.move(sf::Vector2f(std::cos(asteroidAngle) * factor, std::sin(asteroidAngle) * factor), gameWidth, gameHeight);
-
-            //================================================================
-
-            if (ball.getPosition().y - ballRadius < 0.f)
+            //=>Asteroid generation
+            int currentTime = gameClock.getElapsedTime().asSeconds();
+            if (currentTime % 5 == 0 && gameClock.getElapsedTime().asSeconds() > lastCreation + 1.f)
             {
-                // ballSound.play();
-                ballAngle = -ballAngle;
-                ball.setPosition(ball.getPosition().x, ballRadius + 0.1f);
+                lastCreation = gameClock.getElapsedTime().asSeconds();
+                int xRand = rand() % 1;
+                int yRand = rand() % 1;
+
+                int x = 0;
+                if (xRand == 0)
+                {
+                    x = gameWidth;
+                }
+
+                int y = 0;
+                if (yRand == 0)
+                {
+                    y = gameHeight;
+                }
+                Asteriod newAsteroid(8, 4, sf::Vector2f(x, y), gameWidth, gameHeight);
+                asteroidArr.push_back(newAsteroid);
             }
-            if (ball.getPosition().y + ballRadius > gameHeight)
+
+            //=>Asteroid actions
+            for (int i = 0; i < asteroidArr.size(); i++)
             {
-                // ballSound.play();
-                ballAngle = -ballAngle;
-                ball.setPosition(ball.getPosition().x, gameHeight - ballRadius - 0.1f);
+                float asteroidAngle = (pi / 180) * (asteroidArr[i].getRotation()); // Convert bullet's angle to radians
+                //=>Movement
+                asteroidArr[i].rotate(0.5f);
+                asteroidArr[i].move(sf::Vector2f(std::cos(asteroidAngle) * factor, std::sin(asteroidAngle) * factor));
+
+                //=>Collision
+                for (int j = 0; j < bulletArr.size(); j++)
+                {
+                    if (asteroidArr[i].bulletCollision(bulletArr[j]) == true && bulletArr[j].getCollided() == false)
+                    {
+                        score += 10;
+                        scoreMessage.setString("SCORE: " + std::to_string(score));
+                        bulletArr[j].collide();            // Prevent bullet to collide again
+                        if (asteroidArr[i].getScale() > 1) // In case asteroid is still big enough to be partitionated
+                        {
+                            Asteriod newAsteroid_1(8, asteroidArr[i].getScale() - 1, asteroidArr[i].getPosition(), gameWidth, gameHeight);
+                            asteroidArr.push_back(newAsteroid_1);
+
+                            Asteriod newAsteroid_2(8, asteroidArr[i].getScale() - 1, asteroidArr[i].getPosition(), gameWidth, gameHeight);
+                            asteroidArr.push_back(newAsteroid_2);
+                        }
+                        asteroidArr.erase(asteroidArr.begin() + i);
+                    }
+                }
+            }
+
+            //================================================================
+            //  BULLETS
+            //================================================================
+
+            //=>Movement
+            for (int i = 0; i < bulletArr.size(); i++)
+            {
+                bulletArr[i].move(bulletSpeed);
+            }
+
+            //=>Check bounds to deletion
+            for (int i = 0; i < bulletArr.size(); i++)
+            {
+                if (bulletArr[i].checkBounds(gameWidth, gameHeight))
+                {
+                    bulletArr.erase(bulletArr.begin() + i);
+                }
             }
         }
 
-        // Clear the window
+        //================================================================
+        //  DRAW OBJECTS
+        //================================================================
+
         window.clear(sf::Color(0, 0, 0));
 
-        if (isPlaying)
+        if (isPlaying && !hitPause)
         {
             ship.draw(window);
-            asteroid.draw(window);
+
+            for (int i = 0; i < asteroidArr.size(); i++)
+            {
+                asteroidArr[i].draw(window);
+            }
+
+            for (int i = 0; i < bulletArr.size(); i++)
+            {
+                bulletArr[i].draw(window);
+            }
+
+            window.draw(scoreMessage);
         }
         else
         {
             // Draw the pause message
-            window.draw(pauseMessage);
+            window.draw(controlMessage);
         }
 
-        // Display things on screen
+        // Display screen
         window.display();
     }
 
