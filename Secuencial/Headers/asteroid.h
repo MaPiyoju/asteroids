@@ -13,6 +13,7 @@ public:
         {
             int x = 0;
             int y = 0;
+            // Generate polygon by sectors
             if (i > 1 && i < 6)
             {
                 x = rand() % (20 - 10 + 1) + 10;
@@ -57,7 +58,7 @@ public:
         {
             asteroid.setPosition(gameW, asteroid.getPosition().y);
         }
-        if (asteroid.getPosition().x > gameW)
+        if (asteroid.getPosition().x - asteroid.getLocalBounds().width / 2 > gameW)
         {
             asteroid.setPosition(-asteroid.getLocalBounds().width, asteroid.getPosition().y);
         }
@@ -67,7 +68,7 @@ public:
         {
             asteroid.setPosition(asteroid.getPosition().x, gameH);
         }
-        if (asteroid.getPosition().y > gameH)
+        if (asteroid.getPosition().y - asteroid.getLocalBounds().height / 2 > gameH)
         {
             asteroid.setPosition(asteroid.getPosition().x, -asteroid.getLocalBounds().height);
         }

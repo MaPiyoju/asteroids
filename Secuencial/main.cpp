@@ -32,11 +32,18 @@ int main()
                             sf::Style::Titlebar | sf::Style::Close);
     window.setVerticalSyncEnabled(true);
 
-    // // Load the sounds used in the game
-    // sf::SoundBuffer ballSoundBuffer;
-    // if (!ballSoundBuffer.loadFromFile("resources/ball.wav"))
-    //     return EXIT_FAILURE;
-    // sf::Sound ballSound(ballSoundBuffer);
+    // Load the sounds used in the game
+    sf::SoundBuffer asteroidHitBuffer;
+    if (!asteroidHitBuffer.loadFromFile("./Resources/hit.wav"))
+        return EXIT_FAILURE;
+    sf::Sound asteroidHitSound(asteroidHitBuffer);
+
+    // Load the sounds used in the game
+    sf::SoundBuffer bulletBuffer;
+    if (!bulletBuffer.loadFromFile("./Resources/piu.wav"))
+        return EXIT_FAILURE;
+    sf::Sound bulletSound(bulletBuffer);
+    bulletSound.setVolume(25.f);
 
     // Load text font
     sf::Font font;
@@ -85,6 +92,7 @@ int main()
     float shipSpeed = 200.f;
     float shipRotation = 3.f;
     bool canFire = true;
+    bool isPropulsed = false;
     float lastFire = 0.f;
 
     float asteroidSpeed = 300.f;
@@ -124,10 +132,49 @@ int main()
                     hitPause = false;
                     ship.reset();
                 }
+
+                asteroidArr.clear(); // Delete all current asteroids
             }
         }
 
         float deltaTime = clock.restart().asSeconds();
+
+        //================================================================
+        //  ASTEROIDS
+        //================================================================
+        float factor = asteroidSpeed * deltaTime;
+        //=>Asteroid generation
+        int currentTime = gameClock.getElapsedTime().asSeconds();
+        if (currentTime % 5 == 0 && gameClock.getElapsedTime().asSeconds() > lastCreation + 1.f)
+        {
+            lastCreation = gameClock.getElapsedTime().asSeconds();
+            int xRand = rand() % 1;
+            int yRand = rand() % 1;
+
+            int x = 0;
+            if (xRand == 0)
+            {
+                x = gameWidth;
+            }
+
+            int y = 0;
+            if (yRand == 0)
+            {
+                y = gameHeight;
+            }
+            Asteriod newAsteroid(8, 4, sf::Vector2f(x, y), gameWidth, gameHeight);
+            asteroidArr.push_back(newAsteroid);
+        }
+
+        //=>Asteroid actions
+        for (int i = 0; i < asteroidArr.size(); i++)
+        {
+            float asteroidAngle = (pi / 180) * (asteroidArr[i].getRotation()); // Convert bullet's angle to radians
+            //=>Movement
+            asteroidArr[i].rotate(0.5f);
+            asteroidArr[i].move(sf::Vector2f(std::cos(asteroidAngle) * factor, std::sin(asteroidAngle) * factor));
+        }
+
         if (isPlaying && !hitPause)
         {
             //================================================================
@@ -136,6 +183,7 @@ int main()
 
             //=>Ship's movement
             float shipAngle = (pi / 180) * (ship.getRotation()); // Convert ship's angle to radians
+            isPropulsed = false;
 
             // Idle movement, since it's space ship will always be moving
             float angleX = (idleSpeed * deltaTime * shipDir) * cos(shipAngle);
@@ -148,6 +196,7 @@ int main()
                 float angleX = (shipSpeed * deltaTime) * cos(shipAngle);
                 float angleY = (shipSpeed * deltaTime) * sin(shipAngle);
                 shipDir = 1; // Set direction of idle movement
+                isPropulsed = true;
                 ship.move(sf::Vector2f(angleX, angleY));
             }
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
@@ -155,6 +204,7 @@ int main()
                 float angleX = (-shipSpeed * deltaTime) * cos(shipAngle);
                 float angleY = (-shipSpeed * deltaTime) * sin(shipAngle);
                 shipDir = -1; // Set direction of idle movement
+                isPropulsed = true;
                 ship.move(sf::Vector2f(angleX, angleY));
             }
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
@@ -166,11 +216,22 @@ int main()
                 ship.rotate(shipRotation);
             }
 
+            //=>Ship's propultion
+            if (isPropulsed == true)
+            {
+                int time = gameClock.getElapsedTime().asSeconds();
+                if (time % 2 == 0)
+                {
+                    ship.switchPropultion();
+                }
+            }
+
             //=>Ship's bullets
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space) && gameClock.getElapsedTime().asSeconds() > lastFire + .25f)
             {
                 Bullet newBullet(2, ship.getPosition(), pi, ship.getRotation());
                 bulletArr.push_back(newBullet);
+                bulletSound.play();
                 lastFire = gameClock.getElapsedTime().asSeconds(); // Control elapsed time between shots so prevent infinite bullets
             }
 
@@ -188,39 +249,9 @@ int main()
             //================================================================
             //  ASTEROIDS
             //================================================================
-            float factor = asteroidSpeed * deltaTime;
-
-            //=>Asteroid generation
-            int currentTime = gameClock.getElapsedTime().asSeconds();
-            if (currentTime % 5 == 0 && gameClock.getElapsedTime().asSeconds() > lastCreation + 1.f)
-            {
-                lastCreation = gameClock.getElapsedTime().asSeconds();
-                int xRand = rand() % 1;
-                int yRand = rand() % 1;
-
-                int x = 0;
-                if (xRand == 0)
-                {
-                    x = gameWidth;
-                }
-
-                int y = 0;
-                if (yRand == 0)
-                {
-                    y = gameHeight;
-                }
-                Asteriod newAsteroid(8, 4, sf::Vector2f(x, y), gameWidth, gameHeight);
-                asteroidArr.push_back(newAsteroid);
-            }
-
             //=>Asteroid actions
             for (int i = 0; i < asteroidArr.size(); i++)
             {
-                float asteroidAngle = (pi / 180) * (asteroidArr[i].getRotation()); // Convert bullet's angle to radians
-                //=>Movement
-                asteroidArr[i].rotate(0.5f);
-                asteroidArr[i].move(sf::Vector2f(std::cos(asteroidAngle) * factor, std::sin(asteroidAngle) * factor));
-
                 //=>Collision
                 for (int j = 0; j < bulletArr.size(); j++)
                 {
@@ -238,6 +269,7 @@ int main()
                             asteroidArr.push_back(newAsteroid_2);
                         }
                         asteroidArr.erase(asteroidArr.begin() + i);
+                        asteroidHitSound.play();
                     }
                 }
             }
@@ -271,6 +303,10 @@ int main()
         if (isPlaying && !hitPause)
         {
             ship.draw(window);
+            if (isPropulsed == true)
+            {
+                ship.drawPropultion(window);
+            }
 
             for (int i = 0; i < asteroidArr.size(); i++)
             {
@@ -286,6 +322,12 @@ int main()
         }
         else
         {
+            // Draw asteroids for decoration
+            for (int i = 0; i < asteroidArr.size(); i++)
+            {
+                asteroidArr[i].draw(window);
+            }
+
             // Draw the pause message
             window.draw(controlMessage);
         }
