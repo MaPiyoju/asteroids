@@ -12,6 +12,8 @@
 #include "Headers/bulllet.h"
 #include "Headers/asteroid.h"
 
+#include <omp.h>
+
 ////////////////////////////////////////////////////////////
 /// Entry point of application
 ///
@@ -20,6 +22,8 @@
 ////////////////////////////////////////////////////////////
 int main()
 {
+    omp_set_num_threads(8);
+
     std::srand(static_cast<unsigned int>(std::time(NULL)));
 
     // Define game constants
@@ -28,7 +32,7 @@ int main()
     const int gameHeight = 900;
 
     // Create the window of the application
-    sf::RenderWindow window(sf::VideoMode(gameWidth, gameHeight, 32), "Asteroids - OpenMP",
+    sf::RenderWindow window(sf::VideoMode(gameWidth, gameHeight, 32), "Asteroids - Secuencial",
                             sf::Style::Titlebar | sf::Style::Close);
     window.setVerticalSyncEnabled(true);
 
@@ -99,6 +103,7 @@ int main()
     // Define game properties
     sf::Clock gameClock; // Time of game
     sf::Clock clock;     // Time to control smooth movements
+    sf::Clock controlClock;
     bool isPlaying = false;
     bool hitPause = false;
 
@@ -180,12 +185,12 @@ int main()
             fpsMessage.setFillColor(sf::Color::Blue);
         }
 
-        float deltaTime = clock.restart().asSeconds();
-
         //================================================================
         //  ASTEROIDS
         //================================================================
+        float deltaTime = clock.restart().asSeconds();
         float factor = asteroidSpeed * deltaTime;
+        int asteroidLen = asteroidArr.size();
         //=>Asteroid generation
         int currentTime = gameClock.getElapsedTime().asSeconds();
         if (currentTime % 5 == 0 && gameClock.getElapsedTime().asSeconds() > lastCreation + 1.f)
@@ -210,7 +215,8 @@ int main()
         }
 
         //=>Asteroid actions
-        for (int i = 0; i < asteroidArr.size(); i++)
+#pragma omp parallel for shared(asteroidLen)
+        for (int i = 0; i < asteroidLen; i++)
         {
             float asteroidAngle = (pi / 180) * (asteroidArr[i].getRotation()); // Convert bullet's angle to radians
             //=>Movement
@@ -278,9 +284,15 @@ int main()
                 lastFire = gameClock.getElapsedTime().asSeconds(); // Control elapsed time between shots so prevent infinite bullets
             }
 
-            //=>Ship's collisions against asteroids
-            for (int i = 0; i < asteroidArr.size(); i++)
+            //================================================================
+            //  ASTEROIDS
+            //================================================================
+
+//=>Ship's collisions against asteroids
+#pragma omp parallel for shared(asteroidLen)
+            for (int i = 0; i < asteroidLen; i++)
             {
+                // printf("Check: %d - %d\n", omp_get_thread_num(), omp_get_num_threads());
                 if (asteroidArr[i].shipCollision(ship) == true)
                 {
                     score -= 5;
@@ -291,11 +303,9 @@ int main()
                 }
             }
 
-            //================================================================
-            //  ASTEROIDS
-            //================================================================
             //=>Asteroid actions
-            for (int i = 0; i < asteroidArr.size(); i++)
+            //#pragma omp parallel for shared(asteroidLen)
+            for (int i = 0; i < asteroidLen; i++)
             {
                 //=>Collision
                 for (int j = 0; j < bulletArr.size(); j++)
@@ -376,7 +386,6 @@ int main()
             // Draw the pause message
             window.draw(controlMessage);
         }
-
         window.draw(fpsMessage);
         window.draw(fpsCMessage);
 
