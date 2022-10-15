@@ -28,7 +28,7 @@ int main()
     const int gameHeight = 900;
 
     // Create the window of the application
-    sf::RenderWindow window(sf::VideoMode(gameWidth, gameHeight, 32), "Asteroids - OpenMP",
+    sf::RenderWindow window(sf::VideoMode(gameWidth, gameHeight, 32), "Asteroids - Secuencial",
                             sf::Style::Titlebar | sf::Style::Close);
     window.setVerticalSyncEnabled(true);
 
@@ -164,6 +164,7 @@ int main()
         //================================================================
         //  FPS CONTROL
         //================================================================
+        if(isPlaying){
         currentTimeControl = fpsClock.getElapsedTime();
         float diff = (currentTimeControl.asMilliseconds() - previousTime.asMilliseconds());
         fps = 1000.0f / diff; // the asSeconds returns a float
@@ -179,12 +180,12 @@ int main()
         {
             fpsMessage.setFillColor(sf::Color::Blue);
         }
-
-        float deltaTime = clock.restart().asSeconds();
+        }
 
         //================================================================
         //  ASTEROIDS
         //================================================================
+        float deltaTime = clock.restart().asSeconds();
         float factor = asteroidSpeed * deltaTime;
         //=>Asteroid generation
         int currentTime = gameClock.getElapsedTime().asSeconds();
@@ -364,6 +365,8 @@ int main()
             }
 
             window.draw(scoreMessage);
+            window.draw(fpsMessage);
+            window.draw(fpsCMessage);
         }
         else
         {
@@ -376,9 +379,6 @@ int main()
             // Draw the pause message
             window.draw(controlMessage);
         }
-
-        window.draw(fpsMessage);
-        window.draw(fpsCMessage);
 
         // Display screen
         window.display();

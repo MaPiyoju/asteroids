@@ -32,7 +32,7 @@ int main()
     const int gameHeight = 900;
 
     // Create the window of the application
-    sf::RenderWindow window(sf::VideoMode(gameWidth, gameHeight, 32), "Asteroids - Secuencial",
+    sf::RenderWindow window(sf::VideoMode(gameWidth, gameHeight, 32), "Asteroids - OpenMP",
                             sf::Style::Titlebar | sf::Style::Close);
     window.setVerticalSyncEnabled(true);
 
@@ -148,10 +148,10 @@ int main()
                 {
                     // (re)start the game
                     isPlaying = true;
-                    fpsCounter = 0;
                     clock.restart();
                     gameClock.restart();
 
+                    fpsCounter = 0;
                     // Reset position of ship
                     ship.reset();
                 }
@@ -169,6 +169,7 @@ int main()
         //================================================================
         //  FPS CONTROL
         //================================================================
+        if(isPlaying){
         currentTimeControl = fpsClock.getElapsedTime();
         float diff = (currentTimeControl.asMilliseconds() - previousTime.asMilliseconds());
         fps = 1000.0f / diff; // the asSeconds returns a float
@@ -183,6 +184,7 @@ int main()
         else
         {
             fpsMessage.setFillColor(sf::Color::Blue);
+        }
         }
 
         //================================================================
@@ -215,8 +217,8 @@ int main()
         }
 
         //=>Asteroid actions
-#pragma omp parallel for shared(asteroidLen)
-        for (int i = 0; i < asteroidLen; i++)
+#pragma omp parallel for shared(asteroidArr)
+        for (int i = 0; i < asteroidArr.size(); i++)
         {
             float asteroidAngle = (pi / 180) * (asteroidArr[i].getRotation()); // Convert bullet's angle to radians
             //=>Movement
@@ -289,8 +291,8 @@ int main()
             //================================================================
 
 //=>Ship's collisions against asteroids
-#pragma omp parallel for shared(asteroidLen)
-            for (int i = 0; i < asteroidLen; i++)
+#pragma omp parallel for shared(asteroidArr)
+            for (int i = 0; i < asteroidArr.size(); i++)
             {
                 // printf("Check: %d - %d\n", omp_get_thread_num(), omp_get_num_threads());
                 if (asteroidArr[i].shipCollision(ship) == true)
@@ -304,10 +306,10 @@ int main()
             }
 
             //=>Asteroid actions
-            //#pragma omp parallel for shared(asteroidLen)
             for (int i = 0; i < asteroidLen; i++)
             {
                 //=>Collision
+#pragma omp parallel for shared(bulletArr)
                 for (int j = 0; j < bulletArr.size(); j++)
                 {
                     if (asteroidArr[i].bulletCollision(bulletArr[j]) == true && bulletArr[j].getCollided() == false)
@@ -374,6 +376,8 @@ int main()
             }
 
             window.draw(scoreMessage);
+            window.draw(fpsMessage);
+            window.draw(fpsCMessage);
         }
         else
         {
@@ -386,8 +390,6 @@ int main()
             // Draw the pause message
             window.draw(controlMessage);
         }
-        window.draw(fpsMessage);
-        window.draw(fpsCMessage);
 
         // Display screen
         window.display();
