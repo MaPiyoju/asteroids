@@ -65,10 +65,10 @@ int main()
     sf::Text controlMessage;
     controlMessage.setFont(font);
     controlMessage.setCharacterSize(40);
-    controlMessage.setOrigin(300, 35);
+    controlMessage.setOrigin(420, 100);
     controlMessage.setPosition(gameWidth / 2, gameHeight / 2);
     controlMessage.setFillColor(sf::Color::White);
-    controlMessage.setString("Press 'Enter' to\n start the game");
+    controlMessage.setString("Press '1' to start the\ngame with Collisions\n\n\nPress '2' to start the\ngame without Collisions");
 
     // Score
     sf::Text scoreMessage;
@@ -101,6 +101,7 @@ int main()
     sf::Clock clock;     // Time to control smooth movements
     bool isPlaying = false;
     bool hitPause = false;
+    bool isCollision = false;
 
     float fps;
     int fpsCounter;
@@ -137,21 +138,26 @@ int main()
             }
 
             // Enter key pressed: play
-            if ((event.type == sf::Event::KeyPressed) && (event.key.code == sf::Keyboard::Enter))
+            if ((event.type == sf::Event::KeyPressed) && (event.key.code == sf::Keyboard::Enter || event.key.code == sf::Keyboard::Num1 || event.key.code == sf::Keyboard::Num2))
             {
-                if (!isPlaying)
+                if (!isPlaying && (event.key.code == sf::Keyboard::Num1 || event.key.code == sf::Keyboard::Num2))
                 {
                     // (re)start the game
                     isPlaying = true;
-                    fpsCounter = 0;
                     clock.restart();
                     gameClock.restart();
 
+                    fpsCounter = 0;
                     // Reset position of ship
                     ship.reset();
+
+                    if (event.key.code == sf::Keyboard::Num1)
+                    {
+                        isCollision = true;
+                    }
                 }
 
-                if (hitPause)
+                if (hitPause && (event.key.code == sf::Keyboard::Enter))
                 {
                     hitPause = false;
                     ship.reset();
@@ -164,22 +170,23 @@ int main()
         //================================================================
         //  FPS CONTROL
         //================================================================
-        if(isPlaying){
-        currentTimeControl = fpsClock.getElapsedTime();
-        float diff = (currentTimeControl.asMilliseconds() - previousTime.asMilliseconds());
-        fps = 1000.0f / diff; // the asSeconds returns a float
-        previousTime = currentTimeControl;
-        fpsMessage.setString("FPS: " + std::to_string(fps));
-        if (fps < 50)
+        if (isPlaying)
         {
-            fpsMessage.setFillColor(sf::Color::Red);
-            fpsCounter++;
-            fpsCMessage.setString(std::to_string(fpsCounter));
-        }
-        else
-        {
-            fpsMessage.setFillColor(sf::Color::Blue);
-        }
+            currentTimeControl = fpsClock.getElapsedTime();
+            float diff = (currentTimeControl.asMilliseconds() - previousTime.asMilliseconds());
+            fps = 1000.0f / diff; // the asSeconds returns a float
+            previousTime = currentTimeControl;
+            fpsMessage.setString("FPS: " + std::to_string(fps));
+            if (fps < 50)
+            {
+                fpsMessage.setFillColor(sf::Color::Red);
+                fpsCounter++;
+                fpsCMessage.setString(std::to_string(fpsCounter));
+            }
+            else
+            {
+                fpsMessage.setFillColor(sf::Color::Blue);
+            }
         }
 
         //================================================================
@@ -284,11 +291,17 @@ int main()
             {
                 if (asteroidArr[i].shipCollision(ship) == true)
                 {
-                    score -= 5;
-                    scoreMessage.setString("SCORE: " + std::to_string(score));
-                    // asteroidArr.clear(); // Delete all current asteroids
-                    // controlMessage.setString("Press 'Enter' to\n     revive");
-                    // hitPause = true;
+                    if (isCollision == true)
+                    {
+                        asteroidArr.clear(); // Delete all current asteroids
+                        controlMessage.setString("Press 'Enter' to\n     revive");
+                        hitPause = true;
+                    }
+                    else
+                    {
+                        score -= 5;
+                        scoreMessage.setString("SCORE: " + std::to_string(score));
+                    }
                 }
             }
 
