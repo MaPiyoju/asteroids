@@ -1,0 +1,94 @@
+﻿  main.cpp
+sfml-graphics-s.lib(RenderStates.cpp.obj) : error LNK2038: se detectaron diferencias para 'RuntimeLibrary': el valor 'MD_DynamicRelease' no coincide con el valor 'MT_StaticRelease' en main.obj
+sfml-graphics-s.lib(CircleShape.cpp.obj) : error LNK2038: se detectaron diferencias para 'RuntimeLibrary': el valor 'MD_DynamicRelease' no coincide con el valor 'MT_StaticRelease' en main.obj
+sfml-graphics-s.lib(RenderWindow.cpp.obj) : error LNK2038: se detectaron diferencias para 'RuntimeLibrary': el valor 'MD_DynamicRelease' no coincide con el valor 'MT_StaticRelease' en main.obj
+sfml-graphics-s.lib(Color.cpp.obj) : error LNK2038: se detectaron diferencias para 'RuntimeLibrary': el valor 'MD_DynamicRelease' no coincide con el valor 'MT_StaticRelease' en main.obj
+sfml-graphics-s.lib(RenderTarget.cpp.obj) : error LNK2038: se detectaron diferencias para 'RuntimeLibrary': el valor 'MD_DynamicRelease' no coincide con el valor 'MT_StaticRelease' en main.obj
+sfml-graphics-s.lib(Shape.cpp.obj) : error LNK2038: se detectaron diferencias para 'RuntimeLibrary': el valor 'MD_DynamicRelease' no coincide con el valor 'MT_StaticRelease' en main.obj
+sfml-graphics-s.lib(Transform.cpp.obj) : error LNK2038: se detectaron diferencias para 'RuntimeLibrary': el valor 'MD_DynamicRelease' no coincide con el valor 'MT_StaticRelease' en main.obj
+sfml-graphics-s.lib(Texture.cpp.obj) : error LNK2038: se detectaron diferencias para 'RuntimeLibrary': el valor 'MD_DynamicRelease' no coincide con el valor 'MT_StaticRelease' en main.obj
+sfml-graphics-s.lib(RenderTextureImplFBO.cpp.obj) : error LNK2038: se detectaron diferencias para 'RuntimeLibrary': el valor 'MD_DynamicRelease' no coincide con el valor 'MT_StaticRelease' en main.obj
+sfml-graphics-s.lib(View.cpp.obj) : error LNK2038: se detectaron diferencias para 'RuntimeLibrary': el valor 'MD_DynamicRelease' no coincide con el valor 'MT_StaticRelease' en main.obj
+sfml-graphics-s.lib(Shader.cpp.obj) : error LNK2038: se detectaron diferencias para 'RuntimeLibrary': el valor 'MD_DynamicRelease' no coincide con el valor 'MT_StaticRelease' en main.obj
+sfml-graphics-s.lib(VertexBuffer.cpp.obj) : error LNK2038: se detectaron diferencias para 'RuntimeLibrary': el valor 'MD_DynamicRelease' no coincide con el valor 'MT_StaticRelease' en main.obj
+sfml-graphics-s.lib(GLExtensions.cpp.obj) : error LNK2038: se detectaron diferencias para 'RuntimeLibrary': el valor 'MD_DynamicRelease' no coincide con el valor 'MT_StaticRelease' en main.obj
+sfml-graphics-s.lib(Transformable.cpp.obj) : error LNK2038: se detectaron diferencias para 'RuntimeLibrary': el valor 'MD_DynamicRelease' no coincide con el valor 'MT_StaticRelease' en main.obj
+sfml-graphics-s.lib(VertexArray.cpp.obj) : error LNK2038: se detectaron diferencias para 'RuntimeLibrary': el valor 'MD_DynamicRelease' no coincide con el valor 'MT_StaticRelease' en main.obj
+sfml-graphics-s.lib(Image.cpp.obj) : error LNK2038: se detectaron diferencias para 'RuntimeLibrary': el valor 'MD_DynamicRelease' no coincide con el valor 'MT_StaticRelease' en main.obj
+sfml-graphics-s.lib(Glsl.cpp.obj) : error LNK2038: se detectaron diferencias para 'RuntimeLibrary': el valor 'MD_DynamicRelease' no coincide con el valor 'MT_StaticRelease' en main.obj
+sfml-graphics-s.lib(ImageLoader.cpp.obj) : error LNK2038: se detectaron diferencias para 'RuntimeLibrary': el valor 'MD_DynamicRelease' no coincide con el valor 'MT_StaticRelease' en main.obj
+sfml-window-s.lib(Window.cpp.obj) : error LNK2038: se detectaron diferencias para 'RuntimeLibrary': el valor 'MD_DynamicRelease' no coincide con el valor 'MT_StaticRelease' en main.obj
+sfml-window-s.lib(VideoMode.cpp.obj) : error LNK2038: se detectaron diferencias para 'RuntimeLibrary': el valor 'MD_DynamicRelease' no coincide con el valor 'MT_StaticRelease' en main.obj
+sfml-window-s.lib(GlContext.cpp.obj) : error LNK2038: se detectaron diferencias para 'RuntimeLibrary': el valor 'MD_DynamicRelease' no coincide con el valor 'MT_StaticRelease' en main.obj
+sfml-window-s.lib(WindowImpl.cpp.obj) : error LNK2038: se detectaron diferencias para 'RuntimeLibrary': el valor 'MD_DynamicRelease' no coincide con el valor 'MT_StaticRelease' en main.obj
+sfml-window-s.lib(VideoModeImpl.cpp.obj) : error LNK2038: se detectaron diferencias para 'RuntimeLibrary': el valor 'MD_DynamicRelease' no coincide con el valor 'MT_StaticRelease' en main.obj
+sfml-window-s.lib(CursorImpl.cpp.obj) : error LNK2038: se detectaron diferencias para 'RuntimeLibrary': el valor 'MD_DynamicRelease' no coincide con el valor 'MT_StaticRelease' en main.obj
+sfml-window-s.lib(WglContext.cpp.obj) : error LNK2038: se detectaron diferencias para 'RuntimeLibrary': el valor 'MD_DynamicRelease' no coincide con el valor 'MT_StaticRelease' en main.obj
+sfml-window-s.lib(JoystickManager.cpp.obj) : error LNK2038: se detectaron diferencias para 'RuntimeLibrary': el valor 'MD_DynamicRelease' no coincide con el valor 'MT_StaticRelease' en main.obj
+sfml-window-s.lib(SensorManager.cpp.obj) : error LNK2038: se detectaron diferencias para 'RuntimeLibrary': el valor 'MD_DynamicRelease' no coincide con el valor 'MT_StaticRelease' en main.obj
+sfml-window-s.lib(WindowImplWin32.cpp.obj) : error LNK2038: se detectaron diferencias para 'RuntimeLibrary': el valor 'MD_DynamicRelease' no coincide con el valor 'MT_StaticRelease' en main.obj
+sfml-window-s.lib(WglExtensions.cpp.obj) : error LNK2038: se detectaron diferencias para 'RuntimeLibrary': el valor 'MD_DynamicRelease' no coincide con el valor 'MT_StaticRelease' en main.obj
+sfml-window-s.lib(Joystick.cpp.obj) : error LNK2038: se detectaron diferencias para 'RuntimeLibrary': el valor 'MD_DynamicRelease' no coincide con el valor 'MT_StaticRelease' en main.obj
+sfml-window-s.lib(JoystickImpl.cpp.obj) : error LNK2038: se detectaron diferencias para 'RuntimeLibrary': el valor 'MD_DynamicRelease' no coincide con el valor 'MT_StaticRelease' en main.obj
+sfml-system-s.lib(String.cpp.obj) : error LNK2038: se detectaron diferencias para 'RuntimeLibrary': el valor 'MD_DynamicRelease' no coincide con el valor 'MT_StaticRelease' en main.obj
+sfml-system-s.lib(Err.cpp.obj) : error LNK2038: se detectaron diferencias para 'RuntimeLibrary': el valor 'MD_DynamicRelease' no coincide con el valor 'MT_StaticRelease' en main.obj
+LINK : warning LNK4098: la biblioteca predeterminada'MSVCRT' entra en conflicto con otras bibliotecas; use la biblioteca /NODEFAULTLIB:biblioteca
+sfml-graphics-s.lib(RenderTarget.cpp.obj) : error LNK2001: símbolo externo glBlendFunc sin resolver
+sfml-graphics-s.lib(RenderTarget.cpp.obj) : error LNK2001: símbolo externo glClear sin resolver
+sfml-graphics-s.lib(RenderTarget.cpp.obj) : error LNK2001: símbolo externo glClearColor sin resolver
+sfml-graphics-s.lib(RenderTarget.cpp.obj) : error LNK2001: símbolo externo glDisable sin resolver
+sfml-graphics-s.lib(RenderTarget.cpp.obj) : error LNK2001: símbolo externo glEnable sin resolver
+sfml-graphics-s.lib(RenderTarget.cpp.obj) : error LNK2001: símbolo externo glLoadIdentity sin resolver
+sfml-graphics-s.lib(Texture.cpp.obj) : error LNK2001: símbolo externo glLoadIdentity sin resolver
+sfml-graphics-s.lib(RenderTarget.cpp.obj) : error LNK2001: símbolo externo glLoadMatrixf sin resolver
+sfml-graphics-s.lib(Texture.cpp.obj) : error LNK2001: símbolo externo glLoadMatrixf sin resolver
+sfml-graphics-s.lib(RenderTarget.cpp.obj) : error LNK2001: símbolo externo glMatrixMode sin resolver
+sfml-graphics-s.lib(Texture.cpp.obj) : error LNK2001: símbolo externo glMatrixMode sin resolver
+sfml-graphics-s.lib(RenderTarget.cpp.obj) : error LNK2001: símbolo externo glPopAttrib sin resolver
+sfml-graphics-s.lib(RenderTarget.cpp.obj) : error LNK2001: símbolo externo glPopMatrix sin resolver
+sfml-graphics-s.lib(RenderTarget.cpp.obj) : error LNK2001: símbolo externo glPushAttrib sin resolver
+sfml-graphics-s.lib(RenderTarget.cpp.obj) : error LNK2001: símbolo externo glPushMatrix sin resolver
+sfml-graphics-s.lib(RenderTarget.cpp.obj) : error LNK2001: símbolo externo glViewport sin resolver
+sfml-graphics-s.lib(RenderTarget.cpp.obj) : error LNK2001: símbolo externo glColorPointer sin resolver
+sfml-graphics-s.lib(RenderTarget.cpp.obj) : error LNK2001: símbolo externo glDisableClientState sin resolver
+sfml-graphics-s.lib(RenderTarget.cpp.obj) : error LNK2001: símbolo externo glDrawArrays sin resolver
+sfml-graphics-s.lib(RenderTarget.cpp.obj) : error LNK2001: símbolo externo glEnableClientState sin resolver
+sfml-graphics-s.lib(RenderTarget.cpp.obj) : error LNK2001: símbolo externo glPopClientAttrib sin resolver
+sfml-graphics-s.lib(RenderTarget.cpp.obj) : error LNK2001: símbolo externo glPushClientAttrib sin resolver
+sfml-graphics-s.lib(RenderTarget.cpp.obj) : error LNK2001: símbolo externo glTexCoordPointer sin resolver
+sfml-graphics-s.lib(RenderTarget.cpp.obj) : error LNK2001: símbolo externo glVertexPointer sin resolver
+sfml-graphics-s.lib(Texture.cpp.obj) : error LNK2001: símbolo externo glFlush sin resolver
+sfml-graphics-s.lib(Shader.cpp.obj) : error LNK2001: símbolo externo glFlush sin resolver
+sfml-graphics-s.lib(TextureSaver.cpp.obj) : error LNK2001: símbolo externo glGetIntegerv sin resolver
+sfml-graphics-s.lib(Texture.cpp.obj) : error LNK2001: símbolo externo glGetIntegerv sin resolver
+sfml-graphics-s.lib(RenderTextureImplFBO.cpp.obj) : error LNK2001: símbolo externo glGetIntegerv sin resolver
+sfml-graphics-s.lib(Shader.cpp.obj) : error LNK2001: símbolo externo glGetIntegerv sin resolver
+sfml-graphics-s.lib(GLExtensions.cpp.obj) : error LNK2001: símbolo externo glGetIntegerv sin resolver
+sfml-graphics-s.lib(Texture.cpp.obj) : error LNK2001: símbolo externo glGetTexImage sin resolver
+sfml-graphics-s.lib(Texture.cpp.obj) : error LNK2001: símbolo externo glTexImage2D sin resolver
+sfml-graphics-s.lib(Texture.cpp.obj) : error LNK2001: símbolo externo glTexParameteri sin resolver
+sfml-graphics-s.lib(Texture.cpp.obj) : error LNK2001: símbolo externo glBindTexture sin resolver
+sfml-graphics-s.lib(TextureSaver.cpp.obj) : error LNK2001: símbolo externo glBindTexture sin resolver
+sfml-graphics-s.lib(Texture.cpp.obj) : error LNK2001: símbolo externo glCopyTexSubImage2D sin resolver
+sfml-graphics-s.lib(Texture.cpp.obj) : error LNK2001: símbolo externo glDeleteTextures sin resolver
+sfml-graphics-s.lib(Texture.cpp.obj) : error LNK2001: símbolo externo glGenTextures sin resolver
+sfml-graphics-s.lib(Texture.cpp.obj) : error LNK2001: símbolo externo glTexSubImage2D sin resolver
+sfml-graphics-s.lib(GLExtensions.cpp.obj) : error LNK2001: símbolo externo glGetError sin resolver
+sfml-graphics-s.lib(GLExtensions.cpp.obj) : error LNK2001: símbolo externo glGetString sin resolver
+sfml-graphics-s.lib(ImageLoader.cpp.obj) : error LNK2001: símbolo externo __imp_feof sin resolver
+sfml-window-s.lib(GlContext.cpp.obj) : error LNK2001: símbolo externo __imp_glEnable sin resolver
+sfml-window-s.lib(GlContext.cpp.obj) : error LNK2001: símbolo externo __imp_glGetError sin resolver
+sfml-window-s.lib(GlContext.cpp.obj) : error LNK2001: símbolo externo __imp_glGetIntegerv sin resolver
+sfml-window-s.lib(GlContext.cpp.obj) : error LNK2001: símbolo externo __imp_glGetString sin resolver
+sfml-window-s.lib(GlContext.cpp.obj) : error LNK2001: símbolo externo __imp_glIsEnabled sin resolver
+sfml-window-s.lib(WglContext.cpp.obj) : error LNK2001: símbolo externo __imp_wglCreateContext sin resolver
+sfml-window-s.lib(WglContext.cpp.obj) : error LNK2001: símbolo externo __imp_wglDeleteContext sin resolver
+sfml-window-s.lib(WglContext.cpp.obj) : error LNK2001: símbolo externo __imp_wglGetProcAddress sin resolver
+sfml-window-s.lib(WglContext.cpp.obj) : error LNK2001: símbolo externo __imp_wglMakeCurrent sin resolver
+sfml-window-s.lib(WglContext.cpp.obj) : error LNK2001: símbolo externo __imp_wglShareLists sin resolver
+sfml-window-s.lib(JoystickImpl.cpp.obj) : error LNK2001: símbolo externo __imp_joyGetPosEx sin resolver
+sfml-window-s.lib(JoystickImpl.cpp.obj) : error LNK2001: símbolo externo __imp_joyGetDevCapsW sin resolver
+sfml-system-s.lib(SleepImpl.cpp.obj) : error LNK2001: símbolo externo __imp_timeGetDevCaps sin resolver
+sfml-system-s.lib(SleepImpl.cpp.obj) : error LNK2001: símbolo externo __imp_timeBeginPeriod sin resolver
+sfml-system-s.lib(SleepImpl.cpp.obj) : error LNK2001: símbolo externo __imp_timeEndPeriod sin resolver
+..\..\..\bin\win64\Release\\asteroids.exe : fatal error LNK1120: 49 externos sin resolver
