@@ -27,18 +27,20 @@
 // The CUDA kernel launchers that get called
 extern "C" {
     bool cuda_asteroidPos(float* theta, float factor, float* outX, float* outY, int numElems);
+    bool cuda_asteroidBounds(float* posX, float* posY, float* w, float* h, float* outX, float* outY, int numElems);
 }
 
 // The CUDA kernel launchers that get called
-void RunAsteroidKernels(std::vector<Asteriod>& asteroidArr, std::vector<sf::Vector2f>& asteroidPos, float factor) {
+void RunAsteroidKernels(std::vector<Asteriod>& asteroidArr, std::vector<sf::Vector2f>& asteroidPos, std::vector<sf::Vector2f>& asteroidBoundPos, float factor) {
+
+    int numElements = asteroidArr.size();
 
     cudaError_t err = cudaSuccess;
+    size_t size = numElements * sizeof(float);
 
-    // Movement Kernel
-    {
-        int numElements = asteroidArr.size();
-        if (numElements > 0) {
-            size_t size = numElements * sizeof(float);
+    if (numElements > 0) {
+        /*Movement Kernel*/
+        {
             // Allocate the host input Angles
             float* h_theta = (float*)malloc(size);
             // Allocate the host output X Coor
@@ -56,7 +58,7 @@ void RunAsteroidKernels(std::vector<Asteriod>& asteroidArr, std::vector<sf::Vect
             /*Initialize theta*/
             for (int i = 0; i < numElements; ++i)
             {
-                h_theta[i] = (PI / 180) * (asteroidArr[i].getRotation()); // Convert asteroid's angle to radians;
+                h_theta[i] = asteroidArr[i].getRotation(); // Get rotation to be operated by kernel;
             }
 
             // Allocate the device input vector theta
@@ -98,7 +100,7 @@ void RunAsteroidKernels(std::vector<Asteriod>& asteroidArr, std::vector<sf::Vect
                 exit(EXIT_FAILURE);
             }
 
-            //Execute kernel
+            //Execute movement kernel
             cuda_asteroidPos(d_theta, factor, d_xCoord, d_yCoord, numElements);
 
             //Copy result xCoord from device to host
@@ -157,6 +159,214 @@ void RunAsteroidKernels(std::vector<Asteriod>& asteroidArr, std::vector<sf::Vect
             free(h_xCoord);
             free(h_yCoord);
         }
+
+        /*Validate position kernel*/
+        {
+            // Allocate the host X Pos
+            float* h_xPos = (float*)malloc(size);
+            // Allocate the host Y Pos
+            float* h_yPos = (float*)malloc(size);
+            // Allocate the host bounds W
+            float* h_wBound = (float*)malloc(size);
+            // Allocate the host bounds H
+            float* h_hBound = (float*)malloc(size);
+            // Allocate the host X Pos
+            float* h_xPosCoord = (float*)malloc(size);
+            // Allocate the host Y Pos
+            float* h_yPosCoord = (float*)malloc(size);
+
+
+            // Verify that allocations succeeded
+            if (h_xPos == NULL || h_yPos == NULL || h_wBound == NULL || h_hBound == NULL)
+            {
+                fprintf(stderr, "Failed to allocate bounds and pos host vectors!\n");
+                exit(EXIT_FAILURE);
+            }
+
+            /*Initialize pos and bounds*/
+            for (int i = 0; i < numElements; ++i)
+            {
+                // Get position
+                h_xPos[i] = asteroidArr[i].getPosition().x; 
+                h_yPos[i] = asteroidArr[i].getPosition().y;
+
+                // Get bounds
+                h_wBound[i] = asteroidArr[i].getBounds().width; 
+                h_hBound[i] = asteroidArr[i].getBounds().height;
+            }
+
+            // Allocate the device input vector bounds
+            float* d_xPos = NULL;
+            err = cudaMalloc((void**)&d_xPos, size);
+
+            if (err != cudaSuccess)
+            {
+                fprintf(stderr, "Failed to allocate device vector x pos(error code %s)!\n", cudaGetErrorString(err));
+                exit(EXIT_FAILURE);
+            }
+
+            float* d_yPos = NULL;
+            err = cudaMalloc((void**)&d_yPos, size);
+
+            if (err != cudaSuccess)
+            {
+                fprintf(stderr, "Failed to allocate device vector y pos(error code %s)!\n", cudaGetErrorString(err));
+                exit(EXIT_FAILURE);
+            }
+
+            // Allocate the device input vector bounds
+            float* d_wBound = NULL;
+            err = cudaMalloc((void**)&d_wBound, size);
+
+            if (err != cudaSuccess)
+            {
+                fprintf(stderr, "Failed to allocate device vector w bound (error code %s)!\n", cudaGetErrorString(err));
+                exit(EXIT_FAILURE);
+            }
+
+            float* d_hBound = NULL;
+            err = cudaMalloc((void**)&d_hBound, size);
+
+            if (err != cudaSuccess)
+            {
+                fprintf(stderr, "Failed to allocate device vector h bound (error code %s)!\n", cudaGetErrorString(err));
+                exit(EXIT_FAILURE);
+            }
+
+            // Allocate the device input vector position X coord
+            float* d_xPosCoord = NULL;
+            err = cudaMalloc((void**)&d_xPosCoord, size);
+
+            if (err != cudaSuccess)
+            {
+                fprintf(stderr, "Failed to allocate device vector xCoord (error code %s)!\n", cudaGetErrorString(err));
+                exit(EXIT_FAILURE);
+            }
+
+            // Allocate the device input vector position Ycoord
+            float* d_yPosCoord = NULL;
+            err = cudaMalloc((void**)&d_yPosCoord, size);
+
+            if (err != cudaSuccess)
+            {
+                fprintf(stderr, "Failed to allocate device vector yCoord (error code %s)!\n", cudaGetErrorString(err));
+                exit(EXIT_FAILURE);
+            }
+
+            /*Copy posand bounds host to device*/
+            err = cudaMemcpy(d_xPos, h_xPos, size, cudaMemcpyHostToDevice);
+
+            if (err != cudaSuccess)
+            {
+                fprintf(stderr, "Failed to copy vector xPos from host to device (error code %s)!\n", cudaGetErrorString(err));
+                exit(EXIT_FAILURE);
+            }
+
+            err = cudaMemcpy(d_yPos, h_yPos, size, cudaMemcpyHostToDevice);
+
+            if (err != cudaSuccess)
+            {
+                fprintf(stderr, "Failed to copy vector xPos from host to device (error code %s)!\n", cudaGetErrorString(err));
+                exit(EXIT_FAILURE);
+            }
+
+            err = cudaMemcpy(d_wBound, h_wBound, size, cudaMemcpyHostToDevice);
+
+            if (err != cudaSuccess)
+            {
+                fprintf(stderr, "Failed to copy vector xPos from host to device (error code %s)!\n", cudaGetErrorString(err));
+                exit(EXIT_FAILURE);
+            }
+
+            err = cudaMemcpy(d_hBound, h_hBound, size, cudaMemcpyHostToDevice);
+
+            if (err != cudaSuccess)
+            {
+                fprintf(stderr, "Failed to copy vector xPos from host to device (error code %s)!\n", cudaGetErrorString(err));
+                exit(EXIT_FAILURE);
+            }
+
+            ////Execute bounds kernel
+            cuda_asteroidBounds(d_xPos, d_yPos, d_wBound, d_hBound, d_xPosCoord, d_yPosCoord, numElements);
+
+            //Copy result device to host
+            err = cudaMemcpy(h_xPosCoord, d_xPosCoord, size, cudaMemcpyDeviceToHost);
+            if (err != cudaSuccess)
+            {
+                fprintf(stderr, "Failed to copy vector xPosCoord from device to host (error code %s)!\n", cudaGetErrorString(err));
+                exit(EXIT_FAILURE);
+            }
+            err = cudaMemcpy(h_yPosCoord, d_yPosCoord, size, cudaMemcpyDeviceToHost);
+            if (err != cudaSuccess)
+            {
+                fprintf(stderr, "Failed to copy vector yPosCoord from device to host (error code %s)!\n", cudaGetErrorString(err));
+                exit(EXIT_FAILURE);
+            }
+
+            //=>Asteroid actions
+            for (int i = 0; i < numElements; i++)
+            {
+                asteroidBoundPos[i] = sf::Vector2f(h_xPosCoord[i], h_yPosCoord[i]);
+            }
+
+            //Free devide xPos memory
+            err = cudaFree(d_xPos);
+
+            if (err != cudaSuccess)
+            {
+                fprintf(stderr, "Failed to free device vector xPos (error code %s)!\n", cudaGetErrorString(err));
+                exit(EXIT_FAILURE);
+            }
+            
+            //Free devide yPos memory
+            err = cudaFree(d_yPos);
+
+            if (err != cudaSuccess)
+            {
+                fprintf(stderr, "Failed to free device vector xPos (error code %s)!\n", cudaGetErrorString(err));
+                exit(EXIT_FAILURE);
+            }
+
+            //Free devide w Bound memory
+            err = cudaFree(d_wBound);
+
+            if (err != cudaSuccess)
+            {
+                fprintf(stderr, "Failed to free device vector wBound (error code %s)!\n", cudaGetErrorString(err));
+                exit(EXIT_FAILURE);
+            }
+
+            //Free devide h Bound memory
+            err = cudaFree(d_hBound);
+
+            if (err != cudaSuccess)
+            {
+                fprintf(stderr, "Failed to free device vector hBound (error code %s)!\n", cudaGetErrorString(err));
+                exit(EXIT_FAILURE);
+            }
+
+            //Free devide d_xPosCoord memory
+            err = cudaFree(d_xPosCoord);
+
+            if (err != cudaSuccess)
+            {
+                fprintf(stderr, "Failed to free device vector xPosCoord (error code %s)!\n", cudaGetErrorString(err));
+                exit(EXIT_FAILURE);
+            }
+            //Free devide d_yPosCoord memory
+            err = cudaFree(d_yPosCoord);
+
+            if (err != cudaSuccess)
+            {
+                fprintf(stderr, "Failed to free device vector yPosCoord (error code %s)!\n", cudaGetErrorString(err));
+                exit(EXIT_FAILURE);
+            }
+            
+            free(h_xPos);
+            free(h_yPos);
+            free(h_wBound);
+            free(h_hBound);
+        }
     }
 }
 
@@ -182,7 +392,7 @@ int main()
     const int gameHeight = 900;
 
     // Create the window of the application
-    sf::RenderWindow window(sf::VideoMode(gameWidth, gameHeight, 32), "Asteroids - Secuencial",
+    sf::RenderWindow window(sf::VideoMode(gameWidth, gameHeight, 32), "Asteroids - CUDA",
         sf::Style::Titlebar | sf::Style::Close);
     window.setVerticalSyncEnabled(true);
 
@@ -210,10 +420,12 @@ int main()
     std::vector<Bullet> bulletArr;     // Bullet Array
     std::vector<Asteriod> asteroidArr; // Asterois Array
     std::vector<sf::Vector2f> asteroidPos; // Asterois Pos Array
+    std::vector<sf::Vector2f> asteroidBoundPos; // Asterois Pos Array
 
     Asteriod asteroid(8, 4, sf::Vector2f(0, 0), gameWidth, gameHeight);
     asteroidArr.push_back(asteroid);
     asteroidPos.push_back(sf::Vector2f(0, 0));
+    asteroidBoundPos.push_back(sf::Vector2f(0, 0));
 
     // Control message
     sf::Text controlMessage;
@@ -319,6 +531,7 @@ int main()
 
                 asteroidArr.clear(); // Delete all current asteroids
                 asteroidPos.clear(); // Delete all current asteroids
+                asteroidBoundPos.clear();
             }
         }
 
@@ -353,7 +566,7 @@ int main()
         //================================================================
         
         //Run asteroid kernels
-        RunAsteroidKernels(asteroidArr, asteroidPos, factor);
+        RunAsteroidKernels(asteroidArr, asteroidPos, asteroidBoundPos, factor);
 
         //=>Asteroid generation
         int currentTime = gameClock.getElapsedTime().asSeconds();
@@ -377,14 +590,19 @@ int main()
             Asteriod newAsteroid(8, 4, sf::Vector2f(x, y), gameWidth, gameHeight);
             asteroidArr.push_back(newAsteroid);
             asteroidPos.push_back(sf::Vector2f(x, y));
+            asteroidBoundPos.push_back(sf::Vector2f(x, y));
         }
 
         //=>Asteroid actions
         for (int i = 0; i < asteroidArr.size(); i++)
         {
             //=>Movement
+            if (asteroidBoundPos[i].x != 99999 && asteroidBoundPos[i].y != 99999) {
+                asteroidArr[i].changePosition(asteroidBoundPos[i]);
+            }
             asteroidArr[i].rotate(0.5f);
             asteroidArr[i].move(asteroidPos[i]);
+            
         }
 
         if (isPlaying && !hitPause)
@@ -456,6 +674,7 @@ int main()
                     {
                         asteroidArr.clear(); // Delete all current asteroids
                         asteroidPos.clear(); // Delete all current asteroids
+                        asteroidBoundPos.clear();
                         controlMessage.setString("Press 'Enter' to\n     revive");
                         hitPause = true;
                     }
@@ -486,13 +705,16 @@ int main()
                             Asteriod newAsteroid_1(8, asteroidArr[i].getScale() - 1, asteroidArr[i].getPosition(), gameWidth, gameHeight);
                             asteroidArr.push_back(newAsteroid_1);
                             asteroidPos.push_back(asteroidArr[i].getPosition());
+                            asteroidBoundPos.push_back(asteroidArr[i].getPosition());
 
                             Asteriod newAsteroid_2(8, asteroidArr[i].getScale() - 1, asteroidArr[i].getPosition(), gameWidth, gameHeight);
                             asteroidArr.push_back(newAsteroid_2);
                             asteroidPos.push_back(asteroidArr[i].getPosition());
+                            asteroidBoundPos.push_back(asteroidArr[i].getPosition());
                         }
                         asteroidArr.erase(asteroidArr.begin() + i);
                         asteroidPos.erase(asteroidPos.begin() + i);
+                        asteroidBoundPos.erase(asteroidBoundPos.begin() + i);
                         asteroidHitSound.play();
                     }
                 }

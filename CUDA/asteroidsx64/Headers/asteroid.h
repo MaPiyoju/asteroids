@@ -53,25 +53,29 @@ public:
     {
         asteroid.move(dir);
 
-        // Check X positions
-        if (asteroid.getPosition().x + asteroid.getLocalBounds().width < 0)
-        {
-            asteroid.setPosition(gameW, asteroid.getPosition().y);
-        }
-        if (asteroid.getPosition().x - asteroid.getLocalBounds().width / 2 > gameW)
-        {
-            asteroid.setPosition(-asteroid.getLocalBounds().width, asteroid.getPosition().y);
-        }
+        //// Check X positions
+        //if (asteroid.getPosition().x + asteroid.getLocalBounds().width < 0)
+        //{
+        //    asteroid.setPosition(gameW, asteroid.getPosition().y);
+        //}
+        //if (asteroid.getPosition().x - asteroid.getLocalBounds().width / 2 > gameW)
+        //{
+        //    asteroid.setPosition(-asteroid.getLocalBounds().width, asteroid.getPosition().y);
+        //}
 
-        // Check Y positions
-        if (asteroid.getPosition().y + asteroid.getLocalBounds().height < 0)
-        {
-            asteroid.setPosition(asteroid.getPosition().x, gameH);
-        }
-        if (asteroid.getPosition().y - asteroid.getLocalBounds().height / 2 > gameH)
-        {
-            asteroid.setPosition(asteroid.getPosition().x, -asteroid.getLocalBounds().height);
-        }
+        //// Check Y positions
+        //if (asteroid.getPosition().y + asteroid.getLocalBounds().height < 0)
+        //{
+        //    asteroid.setPosition(asteroid.getPosition().x, gameH);
+        //}
+        //if (asteroid.getPosition().y - asteroid.getLocalBounds().height / 2 > gameH)
+        //{
+        //    asteroid.setPosition(asteroid.getPosition().x, -asteroid.getLocalBounds().height);
+        //}
+    }
+
+    void changePosition(sf::Vector2f pos) {
+        asteroid.setPosition(pos);
     }
 
     void rotate(float angle)
@@ -122,6 +126,11 @@ public:
     float getRotation()
     {
         return asteroid.getRotation();
+    }
+
+    sf::FloatRect getBounds()
+    {
+        return asteroid.getLocalBounds();
     }
 
     void draw(sf::RenderWindow &window)
