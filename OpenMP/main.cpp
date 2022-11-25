@@ -14,6 +14,8 @@
 
 #include <omp.h>
 
+#include <cstdio>
+
 ////////////////////////////////////////////////////////////
 /// Entry point of application
 ///
@@ -22,6 +24,9 @@
 ////////////////////////////////////////////////////////////
 int main()
 {
+    freopen("output.txt", "w+", stdout);
+    freopen("error.txt", "w+", stderr);
+
     omp_set_num_threads(8);
 
     std::srand(static_cast<unsigned int>(std::time(NULL)));
@@ -127,6 +132,11 @@ int main()
     float asteroidSpeed = 300.f;
     const float asteroidRotation = 1.5f;
     float lastCreation = 0.f;
+    float lastLog = 0.f;
+
+    float maxFps = 0.f;
+    float totGoodFps = 0.f;
+    int countFps = 0;
 
     while (window.isOpen())
     {
@@ -138,6 +148,9 @@ int main()
             if ((event.type == sf::Event::Closed) ||
                 ((event.type == sf::Event::KeyPressed) && (event.key.code == sf::Keyboard::Escape)))
             {
+                float meanFps = totGoodFps / countFps;
+                std::cout << "Max FPS:" << maxFps << std::endl;
+                std::cout << "Mean FPS:" << meanFps << std::endl;
                 window.close();
                 break;
             }
@@ -152,6 +165,7 @@ int main()
                     clock.restart();
                     gameClock.restart();
 
+                    fpsCounter = 0;
                     fpsCounter = 0;
                     // Reset position of ship
                     ship.reset();
@@ -182,6 +196,10 @@ int main()
             fps = 1000.0f / diff; // the asSeconds returns a float
             previousTime = currentTimeControl;
             fpsMessage.setString("FPS: " + std::to_string(fps));
+            if (fps > maxFps)
+            {
+                maxFps = fps;
+            }
             if (fps < 50)
             {
                 fpsMessage.setFillColor(sf::Color::Red);
@@ -190,8 +208,18 @@ int main()
             }
             else
             {
+                totGoodFps += fps;
+                countFps++;
                 fpsMessage.setFillColor(sf::Color::Blue);
             }
+        }
+
+        /*Log control*/
+        int currentCheckTime = gameClock.getElapsedTime().asSeconds();
+        if (currentCheckTime % 5 == 0 && gameClock.getElapsedTime().asSeconds() > lastLog + 1.f)
+        {
+            lastLog = gameClock.getElapsedTime().asSeconds();
+            std::cout << "asteroids," << asteroidArr.size() << ",lowfps," << fpsCounter << std::endl;
         }
 
         //================================================================

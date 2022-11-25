@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include=".\Headers\asteroid.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include=".\Headers\bullet.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include=".\Headers\ship.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="headers">
+      <UniqueIdentifier>{55acd550-38e1-4667-8029-a517447598fd}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

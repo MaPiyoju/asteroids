@@ -1,0 +1,87 @@
+﻿  main.cpp
+D:\UNAL\Distribuidos\Proyecto\asteroids\MPI\asteroidsx64\Headers\ship.h(46,30): warning C4244: 'argumento': conversión de 'int' a 'float'; posible pérdida de datos
+D:\UNAL\Distribuidos\Proyecto\asteroids\MPI\asteroidsx64\Headers\ship.h(58,52): warning C4244: 'argumento': conversión de 'int' a 'float'; posible pérdida de datos
+D:\UNAL\Distribuidos\Proyecto\asteroids\MPI\asteroidsx64\Headers\ship.h(70,43): warning C4244: 'argumento': conversión de 'int' a 'float'; posible pérdida de datos
+D:\UNAL\Distribuidos\Proyecto\asteroids\MPI\asteroidsx64\Headers\ship.h(70,32): warning C4244: 'argumento': conversión de 'int' a 'float'; posible pérdida de datos
+D:\UNAL\Distribuidos\Proyecto\asteroids\MPI\asteroidsx64\Headers\ship.h(71,49): warning C4244: 'argumento': conversión de 'int' a 'float'; posible pérdida de datos
+D:\UNAL\Distribuidos\Proyecto\asteroids\MPI\asteroidsx64\Headers\ship.h(71,38): warning C4244: 'argumento': conversión de 'int' a 'float'; posible pérdida de datos
+D:\UNAL\Distribuidos\Proyecto\asteroids\MPI\asteroidsx64\Headers\ship.h(92,37): warning C4244: 'return': conversión de 'T' a 'int'; posible pérdida de datos
+          with
+          [
+              T=float
+          ]
+D:\UNAL\Distribuidos\Proyecto\asteroids\MPI\asteroidsx64\Headers\ship.h(97,34): warning C4244: 'return': conversión de 'const T' a 'int'; posible pérdida de datos
+          with
+          [
+              T=float
+          ]
+D:\UNAL\Distribuidos\Proyecto\asteroids\MPI\asteroidsx64\Headers\ship.h(102,34): warning C4244: 'return': conversión de 'const T' a 'int'; posible pérdida de datos
+          with
+          [
+              T=float
+          ]
+D:\UNAL\Distribuidos\Proyecto\asteroids\MPI\asteroidsx64\Headers\ship.h(107,37): warning C4244: 'return': conversión de 'T' a 'int'; posible pérdida de datos
+          with
+          [
+              T=float
+          ]
+D:\UNAL\Distribuidos\Proyecto\asteroids\MPI\asteroidsx64\Headers\bulllet.h(56,39): warning C4244: 'return': conversión de 'T' a 'int'; posible pérdida de datos
+          with
+          [
+              T=float
+          ]
+D:\UNAL\Distribuidos\Proyecto\asteroids\MPI\asteroidsx64\Headers\bulllet.h(61,36): warning C4244: 'return': conversión de 'const T' a 'int'; posible pérdida de datos
+          with
+          [
+              T=float
+          ]
+D:\UNAL\Distribuidos\Proyecto\asteroids\MPI\asteroidsx64\Headers\bulllet.h(66,36): warning C4244: 'return': conversión de 'const T' a 'int'; posible pérdida de datos
+          with
+          [
+              T=float
+          ]
+D:\UNAL\Distribuidos\Proyecto\asteroids\MPI\asteroidsx64\Headers\bulllet.h(71,39): warning C4244: 'return': conversión de 'T' a 'int'; posible pérdida de datos
+          with
+          [
+              T=float
+          ]
+D:\UNAL\Distribuidos\Proyecto\asteroids\MPI\asteroidsx64\Headers\asteroid.h(33,64): warning C4244: 'argumento': conversión de 'int' a 'T'; posible pérdida de datos
+          with
+          [
+              T=float
+          ]
+D:\UNAL\Distribuidos\Proyecto\asteroids\MPI\asteroidsx64\Headers\asteroid.h(33,49): warning C4244: 'argumento': conversión de 'int' a 'T'; posible pérdida de datos
+          with
+          [
+              T=float
+          ]
+D:\UNAL\Distribuidos\Proyecto\asteroids\MPI\asteroidsx64\Headers\asteroid.h(59,34): warning C4244: 'argumento': conversión de 'int' a 'float'; posible pérdida de datos
+D:\UNAL\Distribuidos\Proyecto\asteroids\MPI\asteroidsx64\Headers\asteroid.h(69,60): warning C4244: 'argumento': conversión de 'int' a 'float'; posible pérdida de datos
+D:\UNAL\Distribuidos\Proyecto\asteroids\MPI\asteroidsx64\main.cpp(167,41): warning C4267: '=': conversión de 'size_t' a 'unsigned int'; posible pérdida de datos
+D:\UNAL\Distribuidos\Proyecto\asteroids\MPI\asteroidsx64\main.cpp(170,31): warning C4018: '<': no coinciden signed/unsigned
+D:\UNAL\Distribuidos\Proyecto\asteroids\MPI\asteroidsx64\main.cpp(178,47): warning C4018: '<=': no coinciden signed/unsigned
+D:\UNAL\Distribuidos\Proyecto\asteroids\MPI\asteroidsx64\main.cpp(189,46): warning C4018: '<=': no coinciden signed/unsigned
+D:\UNAL\Distribuidos\Proyecto\asteroids\MPI\asteroidsx64\main.cpp(247,28): warning C4244: 'inicializando': conversión de 'sf::Int32' a 'float'; posible pérdida de datos
+D:\UNAL\Distribuidos\Proyecto\asteroids\MPI\asteroidsx64\main.cpp(269,34): warning C4244: 'inicializando': conversión de 'float' a 'int'; posible pérdida de datos
+D:\UNAL\Distribuidos\Proyecto\asteroids\MPI\asteroidsx64\main.cpp(284,46): warning C4018: '<=': no coinciden signed/unsigned
+D:\UNAL\Distribuidos\Proyecto\asteroids\MPI\asteroidsx64\main.cpp(296,46): warning C4018: '<=': no coinciden signed/unsigned
+D:\UNAL\Distribuidos\Proyecto\asteroids\MPI\asteroidsx64\main.cpp(306,47): warning C4018: '<=': no coinciden signed/unsigned
+D:\UNAL\Distribuidos\Proyecto\asteroids\MPI\asteroidsx64\main.cpp(325,29): warning C4244: 'inicializando': conversión de 'float' a 'int'; posible pérdida de datos
+D:\UNAL\Distribuidos\Proyecto\asteroids\MPI\asteroidsx64\main.cpp(343,60): warning C4244: 'argumento': conversión de 'int' a 'T'; posible pérdida de datos
+          with
+          [
+              T=float
+          ]
+D:\UNAL\Distribuidos\Proyecto\asteroids\MPI\asteroidsx64\main.cpp(343,57): warning C4244: 'argumento': conversión de 'int' a 'T'; posible pérdida de datos
+          with
+          [
+              T=float
+          ]
+D:\UNAL\Distribuidos\Proyecto\asteroids\MPI\asteroidsx64\main.cpp(392,26): warning C4244: 'inicializando': conversión de 'float' a 'int'; posible pérdida de datos
+D:\UNAL\Distribuidos\Proyecto\asteroids\MPI\asteroidsx64\main.cpp(35,5): warning C4996: 'freopen': This function or variable may be unsafe. Consider using freopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+D:\UNAL\Distribuidos\Proyecto\asteroids\MPI\asteroidsx64\main.cpp(36,5): warning C4996: 'freopen': This function or variable may be unsafe. Consider using freopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+D:\UNAL\Distribuidos\Proyecto\asteroids\MPI\asteroidsx64\main.cpp(27,28): warning C4101: 'rc': variable local sin referencia
+D:\UNAL\Distribuidos\Proyecto\asteroids\MPI\asteroidsx64\main.cpp(27,25): warning C4101: 'I': variable local sin referencia
+D:\UNAL\Distribuidos\Proyecto\asteroids\MPI\asteroidsx64\main.cpp(27,32): warning C4101: 'i': variable local sin referencia
+  LINK : no se encontró ..\..\..\bin\win64\Debug\\asteroids.exe o no lo generó el último vínculo incremental; ejecutando vínculo completo
+  asteroids.vcxproj -> D:\UNAL\Distribuidos\Proyecto\bin\win64\Debug\asteroids.exe

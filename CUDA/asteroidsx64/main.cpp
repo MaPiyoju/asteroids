@@ -17,8 +17,12 @@
 #include <cuda_runtime_api.h>
 #include <helper_cuda.h>
 
+#include <cstdio>
+
 
 #define PI 3.1415926536f
+const int gameWidth = 1200;
+const int gameHeight = 900;
 
 ////////////////////////////////////////////////////////////
 /// kernel Definitions to consume kernels
@@ -28,15 +32,18 @@
 extern "C" {
     bool cuda_asteroidPos(float* theta, float factor, float* outX, float* outY, int numElems);
     bool cuda_asteroidBounds(float* posX, float* posY, float* w, float* h, float* outX, float* outY, int numElems);
+    bool cuda_asteroidCheckBullet(float* posX, float* posY, float* w, float* h, float* bull_l, float* bull_r, float* bull_t, float* bull_b, int* out, int numElems);
 }
 
 // The CUDA kernel launchers that get called
-void RunAsteroidKernels(std::vector<Asteriod>& asteroidArr, std::vector<sf::Vector2f>& asteroidPos, std::vector<sf::Vector2f>& asteroidBoundPos, float factor) {
+void RunAsteroidKernels(std::vector<Asteriod>& asteroidArr, std::vector<Bullet>& bulletArr, float factor) {
 
     int numElements = asteroidArr.size();
 
     cudaError_t err = cudaSuccess;
     size_t size = numElements * sizeof(float);
+    size_t sizeBool = numElements * sizeof(bool);
+    size_t sizeInt = numElements * sizeof(int);
 
     if (numElements > 0) {
         /*Movement Kernel*/
@@ -124,7 +131,8 @@ void RunAsteroidKernels(std::vector<Asteriod>& asteroidArr, std::vector<sf::Vect
             //=>Asteroid actions
             for (int i = 0; i < numElements; i++)
             {
-                asteroidPos[i] = sf::Vector2f(h_xCoord[i], h_yCoord[i]);
+                asteroidArr[i].rotate(0.5f);
+                asteroidArr[i].move(sf::Vector2f(h_xCoord[i], h_yCoord[i]));
             }
 
             //Free devide theta memory
@@ -176,8 +184,22 @@ void RunAsteroidKernels(std::vector<Asteriod>& asteroidArr, std::vector<sf::Vect
             float* h_yPosCoord = (float*)malloc(size);
 
 
+            // Allocate the host bull l
+            float* h_bull_l= (float*)malloc(size);
+            // Allocate the host bull r
+            float* h_bull_r = (float*)malloc(size);
+            // Allocate the host bull t
+            float* h_bull_t = (float*)malloc(size);
+            // Allocate the host bull b
+            float* h_bull_b = (float*)malloc(size);
+            // Allocate the host bull collision
+            int* h_Collision= (int*)malloc(sizeInt);
+
+            
+
+
             // Verify that allocations succeeded
-            if (h_xPos == NULL || h_yPos == NULL || h_wBound == NULL || h_hBound == NULL)
+            if (h_xPos == NULL || h_yPos == NULL || h_wBound == NULL || h_hBound == NULL || h_bull_l == NULL || h_bull_r == NULL || h_bull_t == NULL || h_bull_b == NULL)
             {
                 fprintf(stderr, "Failed to allocate bounds and pos host vectors!\n");
                 exit(EXIT_FAILURE);
@@ -193,6 +215,15 @@ void RunAsteroidKernels(std::vector<Asteriod>& asteroidArr, std::vector<sf::Vect
                 // Get bounds
                 h_wBound[i] = asteroidArr[i].getBounds().width; 
                 h_hBound[i] = asteroidArr[i].getBounds().height;
+            }
+
+            /*Initialize bullet vars*/
+            for (int i = 0; i < bulletArr.size(); ++i)
+            {
+                h_bull_l[i] = bulletArr[i].getLeft();
+                h_bull_r[i] = bulletArr[i].getRight();
+                h_bull_t[i] = bulletArr[i].getTop();
+                h_bull_b[i] = bulletArr[i].getBottom();
             }
 
             // Allocate the device input vector bounds
@@ -253,6 +284,57 @@ void RunAsteroidKernels(std::vector<Asteriod>& asteroidArr, std::vector<sf::Vect
                 exit(EXIT_FAILURE);
             }
 
+            // Allocate the device input vector bullet L
+            float* d_bull_l = NULL;
+            err = cudaMalloc((void**)&d_bull_l, size);
+
+            if (err != cudaSuccess)
+            {
+                fprintf(stderr, "Failed to allocate device vector bull_l (error code %s)!\n", cudaGetErrorString(err));
+                exit(EXIT_FAILURE);
+            }
+
+            // Allocate the device input vector bullet R
+            float* d_bull_r = NULL;
+            err = cudaMalloc((void**)&d_bull_r, size);
+
+            if (err != cudaSuccess)
+            {
+                fprintf(stderr, "Failed to allocate device vector bull_r (error code %s)!\n", cudaGetErrorString(err));
+                exit(EXIT_FAILURE);
+            }
+            
+            // Allocate the device input vector bullet T
+            float* d_bull_t = NULL;
+            err = cudaMalloc((void**)&d_bull_t, size);
+
+            if (err != cudaSuccess)
+            {
+                fprintf(stderr, "Failed to allocate device vector bull_t (error code %s)!\n", cudaGetErrorString(err));
+                exit(EXIT_FAILURE);
+            }
+
+            // Allocate the device input vector bullet B
+            float* d_bull_b = NULL;
+            err = cudaMalloc((void**)&d_bull_b, size);
+
+            if (err != cudaSuccess)
+            {
+                fprintf(stderr, "Failed to allocate device vector bull_b (error code %s)!\n", cudaGetErrorString(err));
+                exit(EXIT_FAILURE);
+            }
+
+            // Allocate the device input vector bullet collision
+            int* d_Collision = NULL;
+            err = cudaMalloc((void**)&d_Collision, sizeInt);
+
+            if (err != cudaSuccess)
+            {
+                fprintf(stderr, "Failed to allocate device vector bull collision (error code %s)!\n", cudaGetErrorString(err));
+                exit(EXIT_FAILURE);
+            }
+            
+
             /*Copy posand bounds host to device*/
             err = cudaMemcpy(d_xPos, h_xPos, size, cudaMemcpyHostToDevice);
 
@@ -286,8 +368,44 @@ void RunAsteroidKernels(std::vector<Asteriod>& asteroidArr, std::vector<sf::Vect
                 exit(EXIT_FAILURE);
             }
 
+            /*Copu bullet params*/
+            err = cudaMemcpy(d_bull_l, h_bull_l, size, cudaMemcpyHostToDevice);
+
+            if (err != cudaSuccess)
+            {
+                fprintf(stderr, "Failed to copy vector bull_l from host to device (error code %s)!\n", cudaGetErrorString(err));
+                exit(EXIT_FAILURE);
+            }
+
+            err = cudaMemcpy(d_bull_r, h_bull_r, size, cudaMemcpyHostToDevice);
+
+            if (err != cudaSuccess)
+            {
+                fprintf(stderr, "Failed to copy vector bull_r from host to device (error code %s)!\n", cudaGetErrorString(err));
+                exit(EXIT_FAILURE);
+            }
+
+            err = cudaMemcpy(d_bull_t, h_bull_t, size, cudaMemcpyHostToDevice);
+
+            if (err != cudaSuccess)
+            {
+                fprintf(stderr, "Failed to copy vector bull_t from host to device (error code %s)!\n", cudaGetErrorString(err));
+                exit(EXIT_FAILURE);
+            }
+
+            err = cudaMemcpy(d_bull_b, h_bull_b, size, cudaMemcpyHostToDevice);
+
+            if (err != cudaSuccess)
+            {
+                fprintf(stderr, "Failed to copy vector bull_b from host to device (error code %s)!\n", cudaGetErrorString(err));
+                exit(EXIT_FAILURE);
+            }
+
             ////Execute bounds kernel
             cuda_asteroidBounds(d_xPos, d_yPos, d_wBound, d_hBound, d_xPosCoord, d_yPosCoord, numElements);
+
+            ////Execute collision kernel
+            cuda_asteroidCheckBullet(d_xPos, d_yPos, d_wBound, d_hBound, d_bull_l, d_bull_r, d_bull_t, d_bull_b, d_Collision, numElements);
 
             //Copy result device to host
             err = cudaMemcpy(h_xPosCoord, d_xPosCoord, size, cudaMemcpyDeviceToHost);
@@ -302,12 +420,49 @@ void RunAsteroidKernels(std::vector<Asteriod>& asteroidArr, std::vector<sf::Vect
                 fprintf(stderr, "Failed to copy vector yPosCoord from device to host (error code %s)!\n", cudaGetErrorString(err));
                 exit(EXIT_FAILURE);
             }
+            err = cudaMemcpy(h_Collision, d_Collision, sizeInt, cudaMemcpyDeviceToHost);
+            if (err != cudaSuccess)
+            {
+                fprintf(stderr, "Failed to copy vector bullet collision from device to host (error code %s)!\n", cudaGetErrorString(err));
+                exit(EXIT_FAILURE);
+            }
 
             //=>Asteroid actions
             for (int i = 0; i < numElements; i++)
             {
-                asteroidBoundPos[i] = sf::Vector2f(h_xPosCoord[i], h_yPosCoord[i]);
+                if (h_xPosCoord[i] != 99999 && h_yPosCoord[i] != 99999) {
+                    asteroidArr[i].changePosition(sf::Vector2f(h_xPosCoord[i], h_yPosCoord[i]));
+                }
             }
+
+            for (int i = 0; i < numElements; i++){
+                if (h_Collision[i] != 99999)
+                {
+                    if (bulletArr.size() > h_Collision[i]) {
+                        if (bulletArr[h_Collision[i]].getCollided() == false) {
+                            //score += 10;
+                            //scoreMessage.setString("SCORE: " + std::to_string(score));
+                            bulletArr[h_Collision[i]].collide();            // Prevent bullet to collide again
+                            if (asteroidArr[i].getScale() > 1) // In case asteroid is still big enough to be partitionated
+                            {
+                                Asteriod newAsteroid_1(8, asteroidArr[i].getScale() - 1, asteroidArr[i].getPosition(), gameWidth, gameHeight);
+                                asteroidArr.push_back(newAsteroid_1);
+
+                                /*Asteriod newAsteroid_2(8, asteroidArr[i].getScale() - 1, asteroidArr[i].getPosition(), gameWidth, gameHeight);
+                                asteroidArr.push_back(newAsteroid_2);*/
+                            }
+                            //asteroidHitSound.play();
+                        }
+                    }
+                }
+            }
+
+            /*for (int i = 0; i < numElements; i++) {
+                if (h_Collision[i] != 99999)
+                {
+                    asteroidArr.erase(asteroidArr.begin() + i);
+                }
+            }*/
 
             //Free devide xPos memory
             err = cudaFree(d_xPos);
@@ -361,11 +516,57 @@ void RunAsteroidKernels(std::vector<Asteriod>& asteroidArr, std::vector<sf::Vect
                 fprintf(stderr, "Failed to free device vector yPosCoord (error code %s)!\n", cudaGetErrorString(err));
                 exit(EXIT_FAILURE);
             }
+            //Free devide d_bull_l memory
+            err = cudaFree(d_bull_l);
+
+            if (err != cudaSuccess)
+            {
+                fprintf(stderr, "Failed to free device vector d_bull_l (error code %s)!\n", cudaGetErrorString(err));
+                exit(EXIT_FAILURE);
+            }
+            //Free devide d_bull_r memory
+            err = cudaFree(d_bull_r);
+
+            if (err != cudaSuccess)
+            {
+                fprintf(stderr, "Failed to free device vector d_bull_r (error code %s)!\n", cudaGetErrorString(err));
+                exit(EXIT_FAILURE);
+            }
+            //Free devide d_bull_t memory
+            err = cudaFree(d_bull_t);
+
+            if (err != cudaSuccess)
+            {
+                fprintf(stderr, "Failed to free device vector d_bull_t (error code %s)!\n", cudaGetErrorString(err));
+                exit(EXIT_FAILURE);
+            }
+            //Free devide d_bull_b memory
+            err = cudaFree(d_bull_b);
+
+            if (err != cudaSuccess)
+            {
+                fprintf(stderr, "Failed to free device vector d_bull_b (error code %s)!\n", cudaGetErrorString(err));
+                exit(EXIT_FAILURE);
+            }
+            //Free devide d_Collision memory
+            err = cudaFree(d_Collision);
+
+            if (err != cudaSuccess)
+            {
+                fprintf(stderr, "Failed to free device vector d_Collision (error code %s)!\n", cudaGetErrorString(err));
+                exit(EXIT_FAILURE);
+            }
             
             free(h_xPos);
             free(h_yPos);
             free(h_wBound);
             free(h_hBound);
+            
+            free(h_bull_l);
+            free(h_bull_r);
+            free(h_bull_t);
+            free(h_bull_b);
+            free(h_Collision);
         }
     }
 }
@@ -378,6 +579,9 @@ void RunAsteroidKernels(std::vector<Asteriod>& asteroidArr, std::vector<sf::Vect
 ////////////////////////////////////////////////////////////
 int main()
 {
+    freopen("output.txt", "w+", stdout);
+    freopen("error.txt", "w+", stderr);
+
     std::array<int, 9> cudaInfo = getCudaInfo();
     std::cout << "CUDA Cores: " << cudaInfo[0] << std::endl;
     std::cout << "Block threads: " << cudaInfo[3] << std::endl;
@@ -419,13 +623,11 @@ int main()
 
     std::vector<Bullet> bulletArr;     // Bullet Array
     std::vector<Asteriod> asteroidArr; // Asterois Array
-    std::vector<sf::Vector2f> asteroidPos; // Asterois Pos Array
-    std::vector<sf::Vector2f> asteroidBoundPos; // Asterois Pos Array
+    std::vector<bool> asteroidCollision; // Asterois Array
 
     Asteriod asteroid(8, 4, sf::Vector2f(0, 0), gameWidth, gameHeight);
     asteroidArr.push_back(asteroid);
-    asteroidPos.push_back(sf::Vector2f(0, 0));
-    asteroidBoundPos.push_back(sf::Vector2f(0, 0));
+    asteroidCollision.push_back(false);
 
     // Control message
     sf::Text controlMessage;
@@ -488,6 +690,11 @@ int main()
     float asteroidSpeed = 300.f;
     const float asteroidRotation = 1.5f;
     float lastCreation = 0.f;
+    float lastLog = 0.f;
+
+    float maxFps = 0.f;
+    float totGoodFps = 0.f;
+    int countFps = 0;
 
     while (window.isOpen())
     {
@@ -499,6 +706,9 @@ int main()
             if ((event.type == sf::Event::Closed) ||
                 ((event.type == sf::Event::KeyPressed) && (event.key.code == sf::Keyboard::Escape)))
             {
+                float meanFps = totGoodFps / countFps;
+                std::cout << "Max FPS:" << maxFps << std::endl;
+                std::cout << "Mean FPS:" << meanFps << std::endl;
                 window.close();
                 break;
             }
@@ -514,6 +724,7 @@ int main()
                     gameClock.restart();
 
                     fpsCounter = 0;
+                    maxFps = 0;
                     // Reset position of ship
                     ship.reset();
 
@@ -530,8 +741,6 @@ int main()
                 }
 
                 asteroidArr.clear(); // Delete all current asteroids
-                asteroidPos.clear(); // Delete all current asteroids
-                asteroidBoundPos.clear();
             }
         }
 
@@ -545,6 +754,9 @@ int main()
             fps = 1000.0f / diff; // the asSeconds returns a float
             previousTime = currentTimeControl;
             fpsMessage.setString("FPS: " + std::to_string(fps));
+            if (fps > maxFps) {
+                maxFps = fps;
+            }
             if (fps < 50)
             {
                 fpsMessage.setFillColor(sf::Color::Red);
@@ -553,8 +765,19 @@ int main()
             }
             else
             {
+                totGoodFps += fps;
+                countFps++;
                 fpsMessage.setFillColor(sf::Color::Blue);
             }
+        }
+
+
+        /*Log control*/
+        int currentCheckTime = gameClock.getElapsedTime().asSeconds();
+        if (currentCheckTime % 5 == 0 && gameClock.getElapsedTime().asSeconds() > lastLog + 1.f)
+        {
+            lastLog = gameClock.getElapsedTime().asSeconds();
+            std::cout << "asteroids," << asteroidArr.size() << ",lowfps," << fpsCounter << std::endl;
         }
 
 
@@ -566,11 +789,11 @@ int main()
         //================================================================
         
         //Run asteroid kernels
-        RunAsteroidKernels(asteroidArr, asteroidPos, asteroidBoundPos, factor);
+        RunAsteroidKernels(asteroidArr, bulletArr, factor);
 
         //=>Asteroid generation
         int currentTime = gameClock.getElapsedTime().asSeconds();
-        if (currentTime % 5 == 0 && gameClock.getElapsedTime().asSeconds() > lastCreation + 1.f)
+        if (currentTime % 2 == 0 && gameClock.getElapsedTime().asSeconds() > lastCreation + 1.f)
         {
             lastCreation = gameClock.getElapsedTime().asSeconds();
             int xRand = rand() % 1;
@@ -589,20 +812,7 @@ int main()
             }
             Asteriod newAsteroid(8, 4, sf::Vector2f(x, y), gameWidth, gameHeight);
             asteroidArr.push_back(newAsteroid);
-            asteroidPos.push_back(sf::Vector2f(x, y));
-            asteroidBoundPos.push_back(sf::Vector2f(x, y));
-        }
-
-        //=>Asteroid actions
-        for (int i = 0; i < asteroidArr.size(); i++)
-        {
-            //=>Movement
-            if (asteroidBoundPos[i].x != 99999 && asteroidBoundPos[i].y != 99999) {
-                asteroidArr[i].changePosition(asteroidBoundPos[i]);
-            }
-            asteroidArr[i].rotate(0.5f);
-            asteroidArr[i].move(asteroidPos[i]);
-            
+            asteroidCollision.push_back(false);
         }
 
         if (isPlaying && !hitPause)
@@ -673,8 +883,7 @@ int main()
                     if (isCollision == true)
                     {
                         asteroidArr.clear(); // Delete all current asteroids
-                        asteroidPos.clear(); // Delete all current asteroids
-                        asteroidBoundPos.clear();
+                        asteroidCollision.clear();
                         controlMessage.setString("Press 'Enter' to\n     revive");
                         hitPause = true;
                     }
@@ -690,35 +899,29 @@ int main()
             //  ASTEROIDS
             //================================================================
             //=>Asteroid actions
-            for (int i = 0; i < asteroidArr.size(); i++)
-            {
-                //=>Collision
-                for (int j = 0; j < bulletArr.size(); j++)
-                {
-                    if (asteroidArr[i].bulletCollision(bulletArr[j]) == true && bulletArr[j].getCollided() == false)
-                    {
-                        score += 10;
-                        scoreMessage.setString("SCORE: " + std::to_string(score));
-                        bulletArr[j].collide();            // Prevent bullet to collide again
-                        if (asteroidArr[i].getScale() > 1) // In case asteroid is still big enough to be partitionated
-                        {
-                            Asteriod newAsteroid_1(8, asteroidArr[i].getScale() - 1, asteroidArr[i].getPosition(), gameWidth, gameHeight);
-                            asteroidArr.push_back(newAsteroid_1);
-                            asteroidPos.push_back(asteroidArr[i].getPosition());
-                            asteroidBoundPos.push_back(asteroidArr[i].getPosition());
+            //for (int i = 0; i < asteroidArr.size(); i++)
+            //{
+            //    //=>Collision
+            //    for (int j = 0; j < bulletArr.size(); j++)
+            //    {
+            //        if (asteroidArr[i].bulletCollision(bulletArr[j]) == true && bulletArr[j].getCollided() == false)
+            //        {
+            //            score += 10;
+            //            scoreMessage.setString("SCORE: " + std::to_string(score));
+            //            bulletArr[j].collide();            // Prevent bullet to collide again
+            //            if (asteroidArr[i].getScale() > 1) // In case asteroid is still big enough to be partitionated
+            //            {
+            //                Asteriod newAsteroid_1(8, asteroidArr[i].getScale() - 1, asteroidArr[i].getPosition(), gameWidth, gameHeight);
+            //                asteroidArr.push_back(newAsteroid_1);
 
-                            Asteriod newAsteroid_2(8, asteroidArr[i].getScale() - 1, asteroidArr[i].getPosition(), gameWidth, gameHeight);
-                            asteroidArr.push_back(newAsteroid_2);
-                            asteroidPos.push_back(asteroidArr[i].getPosition());
-                            asteroidBoundPos.push_back(asteroidArr[i].getPosition());
-                        }
-                        asteroidArr.erase(asteroidArr.begin() + i);
-                        asteroidPos.erase(asteroidPos.begin() + i);
-                        asteroidBoundPos.erase(asteroidBoundPos.begin() + i);
-                        asteroidHitSound.play();
-                    }
-                }
-            }
+            //                Asteriod newAsteroid_2(8, asteroidArr[i].getScale() - 1, asteroidArr[i].getPosition(), gameWidth, gameHeight);
+            //                asteroidArr.push_back(newAsteroid_2);
+            //            }
+            //            asteroidArr.erase(asteroidArr.begin() + i);
+            //            asteroidHitSound.play();
+            //        }
+            //    }
+            //}
 
             //================================================================
             //  BULLETS

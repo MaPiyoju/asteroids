@@ -1,0 +1,8 @@
+asteroids,5,lowfps,1
+asteroids,13,lowfps,1
+asteroids,19,lowfps,1
+asteroids,26,lowfps,1
+asteroids,33,lowfps,1
+asteroids,44,lowfps,1
+Max FPS:250
+Mean FPS:119.905

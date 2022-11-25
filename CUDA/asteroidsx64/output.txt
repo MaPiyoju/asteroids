@@ -1,0 +1,10 @@
+CUDA Cores: 640
+Block threads: 1024
+Blocks grid: 1
+asteroids,2,lowfps,1
+asteroids,10,lowfps,1
+asteroids,15,lowfps,1
+asteroids,21,lowfps,1
+asteroids,30,lowfps,1
+Max FPS:250
+Mean FPS:120.669
